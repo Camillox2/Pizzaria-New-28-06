@@ -1,0 +1,54 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Cliente {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  nome     String 
+  email    String   @unique
+}
+
+model Pizza {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  nome         String
+  ingredientes String[]
+  preco        Float
+  pedidos      PedidoPizza[]
+}
+
+model Pagamento {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  clienteId String   @db.ObjectId
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
+  valor     Float
+  data      DateTime @default(now())
+}
+
+model Pedido {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  clienteId String   @db.ObjectId
+  cliente   Cliente  @relation(fields: [clienteId], references: [id])
+  pizzas    PedidoPizza[]
+  total     Float
+  data      DateTime @default(now())
+}
+
+model PedidoPizza {
+  id       String   @id @default(auto()) @map("_id") @db.ObjectId
+  pedidoId String   @db.ObjectId
+  pizzaId  String   @db.ObjectId
+  pedido   Pedido   @relation(fields: [pedidoId], references: [id])
+  pizza    Pizza    @relation(fields: [pizzaId], references: [id])
+}
+
